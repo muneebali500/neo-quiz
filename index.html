@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NeoQuiz | Modern Knowledge Challenge</title>
+
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Syne:wght@700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="style.css" />
+  </head>
+
+  <body>
+    <div class="accessibility-notice" id="accessibility-notice"></div>
+
+    <div class="app-container">
+      <!-- ── App Header ──────────────────────────────────────────────── -->
+      <header class="app-header">
+        <!-- Brand -->
+        <div class="logo" role="banner">
+          <div class="logo-icon" aria-hidden="true">
+            <i class="fas fa-brain"></i>
+          </div>
+          <div class="logo-text">
+            <h1>NeoQuiz</h1>
+            <p>Modern Knowledge Challenge</p>
+          </div>
+        </div>
+
+        <!-- Icon Controls -->
+        <nav class="header-controls" aria-label="App controls">
+          <button
+            class="theme-toggle"
+            onclick="toggleTheme()"
+            title="Toggle Theme"
+            aria-label="Toggle colour theme"
+          >
+            <i class="fas fa-palette" aria-hidden="true"></i>
+          </button>
+          <button
+            class="settings-btn"
+            onclick="toggleSettings()"
+            title="Settings"
+            aria-label="Open settings"
+            aria-expanded="false"
+            aria-controls="settings-panel"
+          >
+            <i class="fas fa-cog" aria-hidden="true"></i>
+          </button>
+          <button
+            class="settings-btn"
+            onclick="showPopup()"
+            title="App Info"
+            aria-label="App information"
+          >
+            <i class="fas fa-info" aria-hidden="true"></i>
+          </button>
+        </nav>
+
+        <!-- Live Stats -->
+        <dl class="stats" role="status" aria-label="Quiz configuration">
+          <div class="stat-item">
+            <dd class="stat-value" id="total-questions">10</dd>
+            <dt class="stat-label">Questions</dt>
+          </div>
+          <div class="stat-item">
+            <dd class="stat-value" id="total-time">150</dd>
+            <dt class="stat-label">Seconds</dt>
+          </div>
+          <div class="stat-item">
+            <dd class="stat-value" id="header-difficulty">Medium</dd>
+            <dt class="stat-label">Difficulty</dt>
+          </div>
+        </dl>
+
+        <!-- ── Settings Panel ──────────────────────────────────────── -->
+        <aside
+          class="settings-panel"
+          id="settings-panel"
+          aria-label="Settings"
+          hidden
+        >
+          <h2 class="settings-title">
+            <i class="fas fa-sliders-h" aria-hidden="true"></i> Settings
+          </h2>
+
+          <section class="settings-group" aria-labelledby="appearance-label">
+            <h3 class="settings-group-title" id="appearance-label">
+              Appearance
+            </h3>
+            <ul
+              class="theme-options"
+              role="radiogroup"
+              aria-labelledby="appearance-label"
+            >
+              <li
+                class="theme-option active"
+                role="radio"
+                aria-checked="true"
+                data-theme="default"
+                onclick="changeTheme('default')"
+              >
+                Default
+              </li>
+              <li
+                class="theme-option"
+                role="radio"
+                aria-checked="false"
+                data-theme="dark"
+                onclick="changeTheme('dark')"
+              >
+                Dark
+              </li>
+              <li
+                class="theme-option"
+                role="radio"
+                aria-checked="false"
+                data-theme="high-contrast"
+                onclick="changeTheme('high-contrast')"
+              >
+                High Contrast
+              </li>
+              <li
+                class="theme-option"
+                role="radio"
+                aria-checked="false"
+                data-theme="minimal"
+                onclick="changeTheme('minimal')"
+              >
+                Minimal
+              </li>
+            </ul>
+          </section>
+
+          <section class="settings-group" aria-labelledby="timer-label">
+            <h3 class="settings-group-title" id="timer-label">Timer Options</h3>
+            <ul
+              class="timer-options"
+              role="radiogroup"
+              aria-labelledby="timer-label"
+            >
+              <li
+                class="timer-option active"
+                role="radio"
+                aria-checked="true"
+                data-time="15"
+                onclick="changeTimer(15)"
+              >
+                15s
+              </li>
+              <li
+                class="timer-option"
+                role="radio"
+                aria-checked="false"
+                data-time="20"
+                onclick="changeTimer(20)"
+              >
+                20s
+              </li>
+              <li
+                class="timer-option"
+                role="radio"
+                aria-checked="false"
+                data-time="30"
+                onclick="changeTimer(30)"
+              >
+                30s
+              </li>
+              <li
+                class="timer-option"
+                role="radio"
+                aria-checked="false"
+                data-time="45"
+                onclick="changeTimer(45)"
+              >
+                45s
+              </li>
+              <li
+                class="timer-option"
+                role="radio"
+                aria-checked="false"
+                data-time="0"
+                onclick="changeTimer(0)"
+              >
+                No Timer
+              </li>
+            </ul>
+          </section>
+
+          <section class="settings-group" aria-labelledby="prefs-label">
+            <h3 class="settings-group-title" id="prefs-label">Preferences</h3>
+            <div class="setting-row">
+              <label class="setting-label" for="show-stats"
+                >Show Question Stats</label
+              >
+              <label class="switch">
+                <input
+                  type="checkbox"
+                  id="show-stats"
+                  checked
+                  onchange="toggleQuestionStats()"
+                />
+                <span class="slider"></span>
+              </label>
+            </div>
+            <div class="setting-row">
+              <label class="setting-label" for="keyboard-shortcuts"
+                >Keyboard Shortcuts</label
+              >
+              <label class="switch">
+                <input
+                  type="checkbox"
+                  id="keyboard-shortcuts"
+                  checked
+                  onchange="toggleKeyboardShortcuts()"
+                />
+                <span class="slider"></span>
+              </label>
+            </div>
+            <div class="setting-row">
+              <label class="setting-label" for="reduce-motion"
+                >Reduce Animations</label
+              >
+              <label class="switch">
+                <input
+                  type="checkbox"
+                  id="reduce-motion"
+                  onchange="toggleReducedMotion()"
+                />
+                <span class="slider"></span>
+              </label>
+            </div>
+          </section>
+
+          <section class="settings-group" aria-labelledby="quickstart-label">
+            <h3 class="settings-group-title" id="quickstart-label">
+              Quick Start
+            </h3>
+            <button
+              class="btn btn-primary"
+              style="width: 100%"
+              onclick="quickStart()"
+            >
+              <i class="fas fa-bolt" aria-hidden="true"></i> Start Quick Quiz (5
+              questions)
+            </button>
+          </section>
+        </aside>
+      </header>
+      <!-- /app-header -->
+    </div>
+  </body>
+</html>
