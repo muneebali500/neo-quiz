@@ -393,6 +393,172 @@
           </p>
         </section>
         <!-- /welcome-screen -->
+
+        <!-- ── Loading Screen ──────────────────────────────────────── -->
+        <section
+          class="loading-screen"
+          id="loading-screen"
+          aria-label="Loading"
+          aria-live="polite"
+        >
+          <div
+            class="loading-spinner"
+            role="status"
+            aria-label="Loading quiz questions"
+          ></div>
+          <p class="loading-text">Preparing your quiz...</p>
+        </section>
+
+        <!-- ── Quiz Screen ─────────────────────────────────────────── -->
+        <section
+          class="quiz-screen"
+          id="quiz-screen"
+          aria-labelledby="current-question-num"
+        >
+          <!-- Progress -->
+          <div class="progress-container">
+            <div class="progress-header">
+              <span class="progress-text">Progress</span>
+              <output
+                class="progress-text"
+                id="progress-text"
+                for="progress-fill"
+                >1/10</output
+              >
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" id="progress-fill"></div>
+            </div>
+          </div>
+
+          <!-- Question -->
+          <article class="question-container">
+            <header class="question-header">
+              <div class="question-meta">
+                <strong class="question-number">
+                  Question <span id="current-question-num">1</span>
+                </strong>
+                <span
+                  class="question-category-badge"
+                  id="question-category-badge"
+                ></span>
+              </div>
+              <div class="timer-container">
+                <time
+                  class="timer"
+                  id="timer"
+                  aria-live="polite"
+                  aria-label="Time remaining"
+                >
+                  <i class="fas fa-clock" aria-hidden="true"></i
+                  ><span id="time-left">15</span>s
+                </time>
+                <p class="question-stats" id="question-stats">
+                  <i class="fas fa-chart-bar" aria-hidden="true"></i>
+                  <span id="stats-text">65% correct</span>
+                </p>
+              </div>
+            </header>
+
+            <h2 class="question-text" id="question-text"></h2>
+
+            <ul
+              class="options-container"
+              id="options-container"
+              role="radiogroup"
+              aria-labelledby="question-text"
+            >
+              <!-- Options injected by JS as <li class="option"> -->
+            </ul>
+
+            <aside
+              class="explanation-container"
+              id="explanation-container"
+              aria-live="polite"
+            >
+              <p class="explanation-title">
+                <i class="fas fa-lightbulb" aria-hidden="true"></i> Explanation
+              </p>
+              <p class="explanation-text" id="explanation-text"></p>
+            </aside>
+          </article>
+
+          <!-- Action Buttons -->
+          <nav class="action-buttons" aria-label="Quiz navigation">
+            <button class="btn btn-secondary" onclick="restartQuiz()">
+              <i class="fas fa-redo" aria-hidden="true"></i> Restart
+            </button>
+            <button
+              class="btn btn-primary"
+              id="next-btn"
+              onclick="nextQuestion()"
+              disabled
+              aria-disabled="true"
+            >
+              Next Question
+              <i class="fas fa-arrow-right" aria-hidden="true"></i>
+            </button>
+          </nav>
+
+          <p class="shortcut-hint" id="quiz-shortcut-hint">
+            Press <kbd>1–4</kbd> to answer &bull; <kbd>Space</kbd> or
+            <kbd>N</kbd> for next
+          </p>
+        </section>
+        <!-- /quiz-screen -->
+
+        <!-- ── Results Screen ─────────────────────────────────────── -->
+        <section
+          class="results-screen"
+          id="results-screen"
+          aria-labelledby="results-title"
+        >
+          <header class="results-header">
+            <p class="results-icon" aria-hidden="true">
+              <i class="fas fa-trophy"></i>
+            </p>
+            <h2 class="results-title" id="results-title">Quiz Completed!</h2>
+            <p class="results-subtitle">Here's how you performed</p>
+          </header>
+
+          <section class="score-display" aria-label="Your score">
+            <output class="score-value" id="score-value" aria-live="polite"
+              >0/10</output
+            >
+            <p class="score-label">Your Score</p>
+            <p
+              class="performance-message"
+              id="performance-message"
+              aria-live="polite"
+            ></p>
+          </section>
+
+          <nav class="results-actions" aria-label="Post-quiz actions">
+            <button class="btn btn-primary" onclick="restartQuiz()">
+              <i class="fas fa-redo" aria-hidden="true"></i> Try Again
+            </button>
+            <button class="btn btn-secondary" onclick="shareResults()">
+              <i class="fas fa-share-alt" aria-hidden="true"></i> Share Results
+            </button>
+          </nav>
+
+          <!-- Answer Review -->
+          <section class="review-section" aria-labelledby="review-title">
+            <h3 class="review-title" id="review-title">Answer Review</h3>
+            <ol class="review-items" id="review-items">
+              <!-- Review items injected by JS as:
+                <li class="review-item correct|incorrect">
+                  <p class="review-question">
+                    <span class="review-status correct|incorrect">✓|✗</span>
+                    Question text
+                  </p>
+                  <p class="review-answer">…</p>
+                </li>
+              -->
+            </ol>
+          </section>
+        </section>
+        <!-- /results-screen -->
       </main>
       <!-- /main-content -->
     </div>
