@@ -1,0 +1,31 @@
+# NeoQuiz
+
+NeoQuiz is a modern trivia quiz app built with HTML, CSS, and vanilla
+JavaScript.
+
+## Day 1 Scope
+
+- Create a structured project with separate HTML, CSS, and JavaScript files.
+- Build the original NeoQuiz visual foundation.
+- Add the welcome screen, header stats, difficulty cards, category cards, and
+  selected quiz summary.
+- Add lightweight JavaScript for selecting difficulty and category.
+
+Gameplay, API loading, timer logic, result review, settings, and persistence are
+planned for later milestones.
+
+## Project Structure
+
+```text
+neo-quiz/
+├── index.html
+├── css/
+│   └── style.css
+├── js/
+│   └── app.js
+└── README.md
+```
+
+## Run Locally
+
+Open `index.html` in a browser.

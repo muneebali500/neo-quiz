@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NeoQuiz | Modern Knowledge Challenge</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Syne:wght@700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <div class="accessibility-notice" id="accessibility-notice"></div>
+
+    <div class="app-container">
+      <header class="app-header">
+        <div class="logo" role="banner">
+          <div class="logo-icon" aria-hidden="true">
+            <i class="fas fa-brain"></i>
+          </div>
+          <div class="logo-text">
+            <h1>NeoQuiz</h1>
+            <p>Modern Knowledge Challenge</p>
+          </div>
+        </div>
+
+        <dl class="stats" role="status" aria-label="Quiz configuration">
+          <div class="stat-item">
+            <dd class="stat-value" id="total-questions">10</dd>
+            <dt class="stat-label">Questions</dt>
+          </div>
+          <div class="stat-item">
+            <dd class="stat-value" id="total-time">150</dd>
+            <dt class="stat-label">Seconds</dt>
+          </div>
+          <div class="stat-item">
+            <dd class="stat-value" id="header-difficulty">Medium</dd>
+            <dt class="stat-label">Difficulty</dt>
+          </div>
+        </dl>
+      </header>
+
+      <main class="main-content">
+        <section
+          class="welcome-screen"
+          id="welcome-screen"
+          aria-labelledby="welcome-title"
+        >
+          <header class="welcome-header">
+            <p class="welcome-icon" aria-hidden="true">
+              <i class="fas fa-star"></i>
+            </p>
+            <h2 class="welcome-title" id="welcome-title">
+              Test Your Knowledge
+            </h2>
+            <p class="welcome-description">
+              Challenge yourself with carefully curated questions. Pick your
+              category, set the difficulty, and show what you know.
+            </p>
+          </header>
+
+          <div class="config-section">
+            <p class="config-label" id="difficulty-label">
+              <i class="fas fa-fire" aria-hidden="true"></i> Select Difficulty
+            </p>
+            <ul
+              class="difficulty-grid"
+              role="radiogroup"
+              aria-labelledby="difficulty-label"
+            >
+              <li
+                class="difficulty-card diff-easy"
+                role="radio"
+                aria-checked="false"
+                data-difficulty="easy"
+                tabindex="0"
+              >
+                <p class="diff-icon" aria-hidden="true">&#x1F331;</p>
+                <h3 class="diff-name">Easy</h3>
+                <p class="diff-desc">Great for beginners</p>
+                <ul class="diff-dots" aria-label="1 out of 3">
+                  <li class="diff-dot filled"></li>
+                  <li class="diff-dot"></li>
+                  <li class="diff-dot"></li>
+                </ul>
+              </li>
+              <li
+                class="difficulty-card diff-medium active"
+                role="radio"
+                aria-checked="true"
+                data-difficulty="medium"
+                tabindex="0"
+              >
+                <p class="diff-icon" aria-hidden="true">&#x26A1;</p>
+                <h3 class="diff-name">Medium</h3>
+                <p class="diff-desc">A solid challenge</p>
+                <ul class="diff-dots" aria-label="2 out of 3">
+                  <li class="diff-dot filled"></li>
+                  <li class="diff-dot filled"></li>
+                  <li class="diff-dot"></li>
+                </ul>
+              </li>
+              <li
+                class="difficulty-card diff-hard"
+                role="radio"
+                aria-checked="false"
+                data-difficulty="hard"
+                tabindex="0"
+              >
+                <p class="diff-icon" aria-hidden="true">&#x1F525;</p>
+                <h3 class="diff-name">Hard</h3>
+                <p class="diff-desc">Experts only</p>
+                <ul class="diff-dots" aria-label="3 out of 3">
+                  <li class="diff-dot filled"></li>
+                  <li class="diff-dot filled"></li>
+                  <li class="diff-dot filled"></li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+
+          <div class="config-section">
+            <p class="config-label" id="category-label">
+              <i class="fas fa-th" aria-hidden="true"></i> Select Category
+            </p>
+            <ul
+              class="category-grid"
+              id="category-grid"
+              role="radiogroup"
+              aria-labelledby="category-label"
+            ></ul>
+          </div>
+
+          <aside
+            class="config-summary"
+            id="config-summary"
+            aria-label="Selected configuration"
+          >
+            <span>Your quiz:</span>
+            <ul class="config-chips">
+              <li class="chip" id="summary-difficulty">&#x26A1; Medium</li>
+              <li class="chip" id="summary-category">
+                &#x1F30D; General Knowledge
+              </li>
+              <li class="chip" id="summary-questions">
+                <i class="fas fa-list" aria-hidden="true"></i> 10 questions
+              </li>
+            </ul>
+          </aside>
+
+          <div class="start-area">
+            <button class="btn btn-primary" id="start-btn">
+              <i class="fas fa-play" aria-hidden="true"></i> Start Quiz
+            </button>
+            <button class="btn btn-secondary" id="instructions-btn">
+              <i class="fas fa-info-circle" aria-hidden="true"></i> How It Works
+            </button>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="js/app.js"></script>
+  </body>
+</html>
