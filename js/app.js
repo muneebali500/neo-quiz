@@ -23,6 +23,10 @@ const state = {
   selectedCategoryLabel: "General Knowledge",
   timerDuration: 15,
   questionCount: 10,
+  questions: [],
+  currentQuestionIndex: 0,
+  score: 0,
+  userAnswers: [],
 };
 
 const categoryGrid = document.querySelector("#category-grid");
@@ -30,6 +34,106 @@ const difficultyCards = document.querySelectorAll(".difficulty-card");
 const startButton = document.querySelector("#start-btn");
 const instructionsButton = document.querySelector("#instructions-btn");
 const notice = document.querySelector("#accessibility-notice");
+const welcomeScreen = document.querySelector("#welcome-screen");
+const quizScreen = document.querySelector("#quiz-screen");
+const optionsContainer = document.querySelector("#options-container");
+const nextButton = document.querySelector("#next-btn");
+const restartButton = document.querySelector("#restart-btn");
+
+const localQuestions = [
+  {
+    categoryId: 9,
+    category: "General Knowledge",
+    difficulty: "medium",
+    question: "What is the capital city of Canada?",
+    correctAnswer: "Ottawa",
+    incorrectAnswers: ["Toronto", "Vancouver", "Montreal"],
+  },
+  {
+    categoryId: 9,
+    category: "General Knowledge",
+    difficulty: "medium",
+    question: "Which element has the chemical symbol O?",
+    correctAnswer: "Oxygen",
+    incorrectAnswers: ["Gold", "Osmium", "Zinc"],
+  },
+  {
+    categoryId: 10,
+    category: "Books & Literature",
+    difficulty: "medium",
+    question: "Who wrote the novel 1984?",
+    correctAnswer: "George Orwell",
+    incorrectAnswers: ["Aldous Huxley", "Ray Bradbury", "Jules Verne"],
+  },
+  {
+    categoryId: 11,
+    category: "Film & Cinema",
+    difficulty: "medium",
+    question: "Which film features the quote, 'I'll be back'?",
+    correctAnswer: "The Terminator",
+    incorrectAnswers: ["RoboCop", "Predator", "Die Hard"],
+  },
+  {
+    categoryId: 12,
+    category: "Music",
+    difficulty: "medium",
+    question: "How many strings does a standard guitar usually have?",
+    correctAnswer: "Six",
+    incorrectAnswers: ["Four", "Five", "Seven"],
+  },
+  {
+    categoryId: 17,
+    category: "Science & Nature",
+    difficulty: "medium",
+    question: "What gas do plants absorb during photosynthesis?",
+    correctAnswer: "Carbon dioxide",
+    incorrectAnswers: ["Oxygen", "Nitrogen", "Hydrogen"],
+  },
+  {
+    categoryId: 18,
+    category: "Computers & Tech",
+    difficulty: "medium",
+    question: "What does CSS stand for?",
+    correctAnswer: "Cascading Style Sheets",
+    incorrectAnswers: [
+      "Creative Style Syntax",
+      "Computer Style System",
+      "Coded Style Sheets",
+    ],
+  },
+  {
+    categoryId: 21,
+    category: "Sports",
+    difficulty: "medium",
+    question: "How many players are on a soccer team on the field?",
+    correctAnswer: "11",
+    incorrectAnswers: ["9", "10", "12"],
+  },
+  {
+    categoryId: 22,
+    category: "Geography",
+    difficulty: "medium",
+    question: "Which is the largest ocean on Earth?",
+    correctAnswer: "Pacific Ocean",
+    incorrectAnswers: ["Atlantic Ocean", "Indian Ocean", "Arctic Ocean"],
+  },
+  {
+    categoryId: 23,
+    category: "History",
+    difficulty: "medium",
+    question: "The pyramids of Giza are located in which country?",
+    correctAnswer: "Egypt",
+    incorrectAnswers: ["Mexico", "Greece", "India"],
+  },
+  {
+    categoryId: 25,
+    category: "Art & Culture",
+    difficulty: "medium",
+    question: "Who painted The Persistence of Memory?",
+    correctAnswer: "Salvador Dali",
+    incorrectAnswers: ["Pablo Picasso", "Claude Monet", "Henri Matisse"],
+  },
+];
 
 function renderCategories() {
   categoryGrid.innerHTML = "";
@@ -128,8 +232,122 @@ function showInstructions() {
   );
 }
 
-function handleStartClick() {
-  showNotice("Quiz gameplay will be added in the next build.");
+function startQuiz() {
+  const matchingQuestions = localQuestions.filter(
+    (question) => question.categoryId === state.selectedCategoryId,
+  );
+
+  state.questions =
+    matchingQuestions.length > 0
+      ? matchingQuestions.slice(0, state.questionCount)
+      : localQuestions.slice(0, state.questionCount);
+  state.currentQuestionIndex = 0;
+  state.score = 0;
+  state.userAnswers = [];
+
+  welcomeScreen.style.display = "none";
+  quizScreen.style.display = "block";
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const question = state.questions[state.currentQuestionIndex];
+  const progress = ((state.currentQuestionIndex + 1) / state.questions.length) * 100;
+
+  document.querySelector("#current-question-num").textContent =
+    state.currentQuestionIndex + 1;
+  document.querySelector("#progress-text").textContent =
+    `${state.currentQuestionIndex + 1}/${state.questions.length}`;
+  document.querySelector("#progress-fill").style.width = `${progress}%`;
+  document.querySelector("#question-category-badge").textContent =
+    question.category;
+  document.querySelector("#question-text").textContent = question.question;
+
+  optionsContainer.innerHTML = "";
+  document.querySelector("#explanation-container").style.display = "none";
+  nextButton.disabled = true;
+  nextButton.setAttribute("aria-disabled", "true");
+
+  const answers = shuffleArray([
+    ...question.incorrectAnswers,
+    question.correctAnswer,
+  ]);
+  const letters = ["A", "B", "C", "D"];
+
+  answers.forEach((answer, index) => {
+    const option = document.createElement("li");
+    option.className = "option";
+    option.innerHTML = `
+      <div class="option-letter">${letters[index]}</div>
+      <div class="option-text">${answer}</div>
+    `;
+    option.addEventListener("click", () => {
+      selectAnswer(option, answer, question.correctAnswer);
+    });
+    optionsContainer.appendChild(option);
+  });
+}
+
+function selectAnswer(selectedOption, selectedAnswer, correctAnswer) {
+  if (state.userAnswers[state.currentQuestionIndex] !== undefined) return;
+
+  state.userAnswers[state.currentQuestionIndex] = selectedAnswer;
+
+  document.querySelectorAll(".option").forEach((option) => {
+    option.classList.add("disabled");
+
+    if (option.querySelector(".option-text").textContent === correctAnswer) {
+      option.classList.add("correct");
+    }
+  });
+
+  if (selectedAnswer === correctAnswer) {
+    state.score++;
+  } else {
+    selectedOption.classList.add("wrong");
+  }
+
+  document.querySelector("#explanation-text").textContent =
+    selectedAnswer === correctAnswer
+      ? `Correct! "${correctAnswer}" is the right answer.`
+      : `The correct answer is "${correctAnswer}".`;
+  document.querySelector("#explanation-container").style.display = "block";
+  nextButton.disabled = false;
+  nextButton.setAttribute("aria-disabled", "false");
+}
+
+function nextQuestion() {
+  state.currentQuestionIndex++;
+
+  if (state.currentQuestionIndex < state.questions.length) {
+    renderQuestion();
+    return;
+  }
+
+  showNotice(`Quiz complete. Score: ${state.score}/${state.questions.length}`);
+  restartQuiz();
+}
+
+function restartQuiz() {
+  quizScreen.style.display = "none";
+  welcomeScreen.style.display = "block";
+  state.currentQuestionIndex = 0;
+  state.score = 0;
+  state.userAnswers = [];
+}
+
+function shuffleArray(items) {
+  const shuffled = [...items];
+
+  for (let index = shuffled.length - 1; index > 0; index--) {
+    const swapIndex = Math.floor(Math.random() * (index + 1));
+    [shuffled[index], shuffled[swapIndex]] = [
+      shuffled[swapIndex],
+      shuffled[index],
+    ];
+  }
+
+  return shuffled;
 }
 
 function capitalize(value) {
@@ -140,5 +358,7 @@ renderCategories();
 bindDifficultyCards();
 updateSummary();
 
-startButton.addEventListener("click", handleStartClick);
+startButton.addEventListener("click", startQuiz);
 instructionsButton.addEventListener("click", showInstructions);
+nextButton.addEventListener("click", nextQuestion);
+restartButton.addEventListener("click", restartQuiz);

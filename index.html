@@ -162,6 +162,76 @@
             </button>
           </div>
         </section>
+
+        <section
+          class="quiz-screen"
+          id="quiz-screen"
+          aria-labelledby="current-question-num"
+        >
+          <div class="progress-container">
+            <div class="progress-header">
+              <span class="progress-text">Progress</span>
+              <output
+                class="progress-text"
+                id="progress-text"
+                for="progress-fill"
+                >1/10</output
+              >
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" id="progress-fill"></div>
+            </div>
+          </div>
+
+          <article class="question-container">
+            <header class="question-header">
+              <div class="question-meta">
+                <strong class="question-number">
+                  Question <span id="current-question-num">1</span>
+                </strong>
+                <span
+                  class="question-category-badge"
+                  id="question-category-badge"
+                ></span>
+              </div>
+            </header>
+
+            <h2 class="question-text" id="question-text"></h2>
+
+            <ul
+              class="options-container"
+              id="options-container"
+              role="radiogroup"
+              aria-labelledby="question-text"
+            ></ul>
+
+            <aside
+              class="explanation-container"
+              id="explanation-container"
+              aria-live="polite"
+            >
+              <p class="explanation-title">
+                <i class="fas fa-lightbulb" aria-hidden="true"></i> Feedback
+              </p>
+              <p class="explanation-text" id="explanation-text"></p>
+            </aside>
+          </article>
+
+          <nav class="action-buttons" aria-label="Quiz navigation">
+            <button class="btn btn-secondary" id="restart-btn">
+              <i class="fas fa-redo" aria-hidden="true"></i> Restart
+            </button>
+            <button
+              class="btn btn-primary"
+              id="next-btn"
+              disabled
+              aria-disabled="true"
+            >
+              Next Question
+              <i class="fas fa-arrow-right" aria-hidden="true"></i>
+            </button>
+          </nav>
+        </section>
       </main>
     </div>
 

@@ -14,6 +14,14 @@ JavaScript.
 Gameplay, API loading, timer logic, result review, settings, and persistence are
 planned for later milestones.
 
+## Day 2 Scope
+
+- Add the quiz gameplay screen.
+- Add a small local question bank for early testing.
+- Render questions and shuffled answer options.
+- Highlight correct and incorrect answers.
+- Add next-question and restart controls.
+
 ## Project Structure
 
 ```text
