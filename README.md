@@ -22,6 +22,13 @@ planned for later milestones.
 - Highlight correct and incorrect answers.
 - Add next-question and restart controls.
 
+## Day 3 Scope
+
+- Add the final results screen.
+- Show score and performance feedback after a round.
+- Render an answer review with correct and incorrect answers.
+- Add try-again and share-results actions.
+
 ## Project Structure
 
 ```text

@@ -36,9 +36,12 @@ const instructionsButton = document.querySelector("#instructions-btn");
 const notice = document.querySelector("#accessibility-notice");
 const welcomeScreen = document.querySelector("#welcome-screen");
 const quizScreen = document.querySelector("#quiz-screen");
+const resultsScreen = document.querySelector("#results-screen");
 const optionsContainer = document.querySelector("#options-container");
 const nextButton = document.querySelector("#next-btn");
 const restartButton = document.querySelector("#restart-btn");
+const tryAgainButton = document.querySelector("#try-again-btn");
+const shareResultsButton = document.querySelector("#share-results-btn");
 
 const localQuestions = [
   {
@@ -247,6 +250,7 @@ function startQuiz() {
 
   welcomeScreen.style.display = "none";
   quizScreen.style.display = "block";
+  resultsScreen.style.display = "none";
   renderQuestion();
 }
 
@@ -324,16 +328,92 @@ function nextQuestion() {
     return;
   }
 
-  showNotice(`Quiz complete. Score: ${state.score}/${state.questions.length}`);
-  restartQuiz();
+  showResults();
 }
 
 function restartQuiz() {
   quizScreen.style.display = "none";
+  resultsScreen.style.display = "none";
   welcomeScreen.style.display = "block";
   state.currentQuestionIndex = 0;
   state.score = 0;
   state.userAnswers = [];
+}
+
+function showResults() {
+  quizScreen.style.display = "none";
+  resultsScreen.style.display = "block";
+
+  const percentage = Math.round((state.score / state.questions.length) * 100);
+  document.querySelector("#score-value").textContent =
+    `${state.score}/${state.questions.length}`;
+  document.querySelector("#performance-message").textContent =
+    getPerformanceMessage(percentage);
+
+  renderAnswerReview();
+}
+
+function renderAnswerReview() {
+  const reviewItems = document.querySelector("#review-items");
+  reviewItems.innerHTML = "";
+
+  state.questions.forEach((question, index) => {
+    const userAnswer = state.userAnswers[index];
+    const isCorrect = userAnswer === question.correctAnswer;
+    const item = document.createElement("li");
+
+    item.className = `review-item ${isCorrect ? "correct" : "incorrect"}`;
+    item.innerHTML = `
+      <p class="review-question">
+        <span class="review-status ${isCorrect ? "correct" : "incorrect"}">
+          ${isCorrect ? "✓" : "✗"}
+        </span>
+        ${question.question}
+      </p>
+      <p class="review-answer">
+        ${
+          isCorrect
+            ? `You answered correctly: ${userAnswer}`
+            : `Your answer: <span class="user-answer">${userAnswer || "No answer"}</span> | Correct: <span class="correct-answer">${question.correctAnswer}</span>`
+        }
+      </p>
+    `;
+
+    reviewItems.appendChild(item);
+  });
+}
+
+function getPerformanceMessage(percentage) {
+  if (percentage >= 90) {
+    return "Outstanding! You truly are a quiz master!";
+  }
+
+  if (percentage >= 70) {
+    return "Great job! You have solid knowledge.";
+  }
+
+  if (percentage >= 50) {
+    return "Good effort! Keep learning and improving.";
+  }
+
+  return "Keep practicing! Every attempt makes you better.";
+}
+
+function shareResults() {
+  const text = `I scored ${state.score}/${state.questions.length} on NeoQuiz (${capitalize(state.selectedDifficulty)} - ${state.selectedCategoryLabel})!`;
+
+  if (navigator.share) {
+    navigator.share({
+      title: "My Quiz Results",
+      text,
+      url: window.location.href,
+    });
+    return;
+  }
+
+  navigator.clipboard.writeText(text).then(() => {
+    showNotice("Results copied to clipboard.");
+  });
 }
 
 function shuffleArray(items) {
@@ -362,3 +442,5 @@ startButton.addEventListener("click", startQuiz);
 instructionsButton.addEventListener("click", showInstructions);
 nextButton.addEventListener("click", nextQuestion);
 restartButton.addEventListener("click", restartQuiz);
+tryAgainButton.addEventListener("click", restartQuiz);
+shareResultsButton.addEventListener("click", shareResults);

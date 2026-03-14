@@ -232,6 +232,46 @@
             </button>
           </nav>
         </section>
+
+        <section
+          class="results-screen"
+          id="results-screen"
+          aria-labelledby="results-title"
+        >
+          <header class="results-header">
+            <p class="results-icon" aria-hidden="true">
+              <i class="fas fa-trophy"></i>
+            </p>
+            <h2 class="results-title" id="results-title">Quiz Completed!</h2>
+            <p class="results-subtitle">Here's how you performed</p>
+          </header>
+
+          <section class="score-display" aria-label="Your score">
+            <output class="score-value" id="score-value" aria-live="polite"
+              >0/10</output
+            >
+            <p class="score-label">Your Score</p>
+            <p
+              class="performance-message"
+              id="performance-message"
+              aria-live="polite"
+            ></p>
+          </section>
+
+          <nav class="results-actions" aria-label="Post-quiz actions">
+            <button class="btn btn-primary" id="try-again-btn">
+              <i class="fas fa-redo" aria-hidden="true"></i> Try Again
+            </button>
+            <button class="btn btn-secondary" id="share-results-btn">
+              <i class="fas fa-share-alt" aria-hidden="true"></i> Share Results
+            </button>
+          </nav>
+
+          <section class="review-section" aria-labelledby="review-title">
+            <h3 class="review-title" id="review-title">Answer Review</h3>
+            <ol class="review-items" id="review-items"></ol>
+          </section>
+        </section>
       </main>
     </div>
 
