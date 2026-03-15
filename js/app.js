@@ -35,6 +35,8 @@ const startButton = document.querySelector("#start-btn");
 const instructionsButton = document.querySelector("#instructions-btn");
 const notice = document.querySelector("#accessibility-notice");
 const welcomeScreen = document.querySelector("#welcome-screen");
+const loadingScreen = document.querySelector("#loading-screen");
+const errorScreen = document.querySelector("#error-screen");
 const quizScreen = document.querySelector("#quiz-screen");
 const resultsScreen = document.querySelector("#results-screen");
 const optionsContainer = document.querySelector("#options-container");
@@ -42,6 +44,8 @@ const nextButton = document.querySelector("#next-btn");
 const restartButton = document.querySelector("#restart-btn");
 const tryAgainButton = document.querySelector("#try-again-btn");
 const shareResultsButton = document.querySelector("#share-results-btn");
+const fallbackButton = document.querySelector("#fallback-btn");
+const backToSetupButton = document.querySelector("#back-to-setup-btn");
 
 const localQuestions = [
   {
@@ -231,11 +235,63 @@ function showNotice(message) {
 
 function showInstructions() {
   alert(
-    "Choose a difficulty and a category. The quiz engine will be added in the next milestone.",
+    "Choose a difficulty and category, then start a quiz. Questions are loaded from Open Trivia DB, with sample questions available as a fallback.",
   );
 }
 
-function startQuiz() {
+async function startQuiz() {
+  showScreen(loadingScreen);
+
+  try {
+    state.questions = await fetchQuestions();
+  } catch (error) {
+    showError(error.message);
+    return;
+  }
+
+  state.currentQuestionIndex = 0;
+  state.score = 0;
+  state.userAnswers = [];
+
+  showScreen(quizScreen);
+  renderQuestion();
+}
+
+async function fetchQuestions() {
+  const params = new URLSearchParams({
+    amount: state.questionCount,
+    category: state.selectedCategoryId,
+    difficulty: state.selectedDifficulty,
+    type: "multiple",
+  });
+  const response = await fetch(`https://opentdb.com/api.php?${params}`);
+
+  if (!response.ok) {
+    throw new Error("Network request failed. Please try again.");
+  }
+
+  const data = await response.json();
+
+  if (data.response_code === 1) {
+    throw new Error("Not enough questions are available for this selection.");
+  }
+
+  if (data.response_code !== 0) {
+    throw new Error("The quiz service could not return questions right now.");
+  }
+
+  return data.results.map((question) => ({
+    category: decodeHTML(question.category),
+    difficulty: question.difficulty,
+    question: decodeHTML(question.question),
+    correctAnswer: decodeHTML(question.correct_answer),
+    incorrectAnswers: question.incorrect_answers.map((answer) =>
+      decodeHTML(answer),
+    ),
+  }));
+}
+
+function startFallbackQuiz() {
   const matchingQuestions = localQuestions.filter(
     (question) => question.categoryId === state.selectedCategoryId,
   );
@@ -248,9 +304,7 @@ function startQuiz() {
   state.score = 0;
   state.userAnswers = [];
 
-  welcomeScreen.style.display = "none";
-  quizScreen.style.display = "block";
-  resultsScreen.style.display = "none";
+  showScreen(quizScreen);
   renderQuestion();
 }
 
@@ -332,17 +386,14 @@ function nextQuestion() {
 }
 
 function restartQuiz() {
-  quizScreen.style.display = "none";
-  resultsScreen.style.display = "none";
-  welcomeScreen.style.display = "block";
+  showScreen(welcomeScreen);
   state.currentQuestionIndex = 0;
   state.score = 0;
   state.userAnswers = [];
 }
 
 function showResults() {
-  quizScreen.style.display = "none";
-  resultsScreen.style.display = "block";
+  showScreen(resultsScreen);
 
   const percentage = Math.round((state.score / state.questions.length) * 100);
   document.querySelector("#score-value").textContent =
@@ -351,6 +402,19 @@ function showResults() {
     getPerformanceMessage(percentage);
 
   renderAnswerReview();
+}
+
+function showError(message) {
+  document.querySelector("#error-message").textContent = message;
+  showScreen(errorScreen);
+}
+
+function showScreen(activeScreen) {
+  [welcomeScreen, loadingScreen, errorScreen, quizScreen, resultsScreen].forEach(
+    (screen) => {
+      screen.style.display = screen === activeScreen ? "block" : "none";
+    },
+  );
 }
 
 function renderAnswerReview() {
@@ -434,6 +498,12 @@ function capitalize(value) {
   return value.charAt(0).toUpperCase() + value.slice(1);
 }
 
+function decodeHTML(value) {
+  const textarea = document.createElement("textarea");
+  textarea.innerHTML = value;
+  return textarea.value;
+}
+
 renderCategories();
 bindDifficultyCards();
 updateSummary();
@@ -444,3 +514,5 @@ nextButton.addEventListener("click", nextQuestion);
 restartButton.addEventListener("click", restartQuiz);
 tryAgainButton.addEventListener("click", restartQuiz);
 shareResultsButton.addEventListener("click", shareResults);
+fallbackButton.addEventListener("click", startFallbackQuiz);
+backToSetupButton.addEventListener("click", restartQuiz);

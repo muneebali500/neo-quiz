@@ -164,6 +164,41 @@
         </section>
 
         <section
+          class="loading-screen"
+          id="loading-screen"
+          aria-label="Loading quiz questions"
+          aria-live="polite"
+        >
+          <div
+            class="loading-spinner"
+            role="status"
+            aria-label="Loading"
+          ></div>
+          <p class="loading-text">Preparing your quiz...</p>
+          <p class="loading-detail" id="loading-detail">
+            Fetching fresh questions from Open Trivia DB.
+          </p>
+        </section>
+
+        <section class="error-screen" id="error-screen" aria-live="polite">
+          <div class="error-panel">
+            <p class="error-icon" aria-hidden="true">
+              <i class="fas fa-circle-exclamation"></i>
+            </p>
+            <h2>Questions unavailable</h2>
+            <p id="error-message">
+              We could not load fresh quiz questions right now.
+            </p>
+            <button class="btn btn-primary" id="fallback-btn">
+              Use Sample Questions
+            </button>
+            <button class="btn btn-secondary" id="back-to-setup-btn">
+              Back to Setup
+            </button>
+          </div>
+        </section>
+
+        <section
           class="quiz-screen"
           id="quiz-screen"
           aria-labelledby="current-question-num"

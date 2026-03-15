@@ -29,6 +29,13 @@ planned for later milestones.
 - Render an answer review with correct and incorrect answers.
 - Add try-again and share-results actions.
 
+## Day 4 Scope
+
+- Load fresh quiz questions from the Open Trivia DB API.
+- Add loading and error screens.
+- Decode HTML entities returned by the API.
+- Keep local sample questions as a fallback when the API is unavailable.
+
 ## Project Structure
 
 ```text
