@@ -19,6 +19,44 @@
   --card-border: rgba(255, 255, 255, 0.3);
 }
 
+.theme-dark {
+  --bg-color: #0f172a;
+  --card-bg: rgba(30, 41, 59, 0.95);
+  --text-color: #f1f5f9;
+  --option-bg: #1e293b;
+  --option-border: #334155;
+  --card-border: rgba(255, 255, 255, 0.1);
+  --gray: #94a3b8;
+}
+
+.theme-high-contrast {
+  --bg-color: #000000;
+  --card-bg: #ffffff;
+  --text-color: #000000;
+  --option-bg: #ffffff;
+  --option-border: #000000;
+  --card-border: #000000;
+  --primary: #0000ff;
+  --primary-dark: #0000cc;
+  --secondary: #000000;
+  --accent: #0000ff;
+  --gray: #555555;
+}
+
+.theme-minimal {
+  --bg-color: #ffffff;
+  --card-bg: #ffffff;
+  --text-color: #111827;
+  --option-bg: #f8f9fa;
+  --option-border: #dee2e6;
+  --card-border: #e9ecef;
+  --primary: #495057;
+  --primary-dark: #343a40;
+  --secondary: #6c757d;
+  --accent: #495057;
+  --shadow-lg: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -34,6 +72,15 @@ body {
   justify-content: center;
   background: linear-gradient(135deg, var(--bg-color) 0%, #fdf2f8 100%);
   color: var(--text-color);
+}
+
+.reduced-motion *,
+.reduced-motion *::before,
+.reduced-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  scroll-behavior: auto !important;
+  transition-duration: 0.01ms !important;
 }
 
 ul,
@@ -102,6 +149,34 @@ li {
   gap: 24px;
 }
 
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: auto;
+}
+
+.theme-toggle,
+.settings-btn {
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.theme-toggle:hover,
+.settings-btn:hover {
+  transform: scale(1.05);
+  background: rgba(255, 255, 255, 0.3);
+}
+
 .stat-item {
   text-align: center;
 }
@@ -116,6 +191,169 @@ li {
   opacity: 0.8;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+}
+
+.settings-panel {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 32px;
+  z-index: 1000;
+  width: 300px;
+  padding: 24px;
+  border: 1px solid var(--option-border);
+  border-radius: var(--radius-md);
+  display: none;
+  background: white;
+  box-shadow: var(--shadow-lg);
+  color: var(--dark);
+}
+
+.settings-panel.show {
+  display: block;
+}
+
+.settings-title {
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--dark);
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.settings-group {
+  margin-bottom: 24px;
+}
+
+.settings-group:last-child {
+  margin-bottom: 0;
+}
+
+.settings-group-title {
+  margin-bottom: 12px;
+  color: var(--gray);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.theme-options {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.theme-option {
+  padding: 12px;
+  border: 2px solid #e2e8f0;
+  border-radius: var(--radius-sm);
+  color: #333333;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.theme-option:hover {
+  transform: translateY(-2px);
+  border-color: var(--primary);
+}
+
+.theme-option.active {
+  border-color: var(--primary);
+  background: rgba(99, 102, 241, 0.05);
+  color: var(--primary);
+}
+
+.timer-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.timer-option {
+  padding: 8px 16px;
+  border: 2px solid #e2e8f0;
+  border-radius: 20px;
+  background: #f1f5f9;
+  color: #333333;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.timer-option:hover {
+  background: #e2e8f0;
+}
+
+.timer-option.active {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: white;
+}
+
+.setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.setting-label {
+  color: var(--dark);
+  font-size: 14px;
+}
+
+.switch {
+  position: relative;
+  width: 50px;
+  height: 24px;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.switch input {
+  width: 0;
+  height: 0;
+  opacity: 0;
+}
+
+.slider {
+  position: absolute;
+  inset: 0;
+  border-radius: 24px;
+  background-color: #cbd5e1;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.slider::before {
+  content: "";
+  position: absolute;
+  bottom: 4px;
+  left: 4px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background-color: white;
+  transition: 0.3s;
+}
+
+.switch input:checked + .slider {
+  background-color: var(--primary);
+}
+
+.switch input:checked + .slider::before {
+  transform: translateX(26px);
+}
+
+.quick-start-btn {
+  width: 100%;
 }
 
 .main-content {
@@ -533,6 +771,11 @@ li {
 
 .question-header {
   margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
 }
 
 .question-meta {
@@ -557,6 +800,44 @@ li {
   color: var(--primary);
   font-size: 13px;
   font-weight: 700;
+}
+
+.timer-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.timer,
+.question-stats {
+  padding: 8px 12px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(99, 102, 241, 0.08);
+  color: var(--primary);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.timer.warning {
+  background: rgba(245, 158, 11, 0.12);
+  color: #b45309;
+}
+
+.timer.danger {
+  background: rgba(239, 68, 68, 0.12);
+  color: #b91c1c;
+}
+
+.question-stats {
+  display: none;
+}
+
+.question-stats.show {
+  display: inline-flex;
 }
 
 .question-text {
@@ -726,6 +1007,12 @@ li {
   font-weight: 700;
 }
 
+.time-used {
+  margin-top: 8px;
+  color: var(--gray);
+  font-size: 14px;
+}
+
 .results-actions {
   display: flex;
   gap: 14px;
@@ -855,6 +1142,18 @@ li {
   .stats {
     width: 100%;
     justify-content: space-between;
+  }
+
+  .header-controls {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+  }
+
+  .settings-panel {
+    right: 16px;
+    left: 16px;
+    width: auto;
   }
 
   .main-content {

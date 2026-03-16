@@ -36,6 +36,14 @@ planned for later milestones.
 - Decode HTML entities returned by the API.
 - Keep local sample questions as a fallback when the API is unavailable.
 
+## Day 5 Scope
+
+- Add the settings panel.
+- Add default, dark, high-contrast, and minimal themes.
+- Add configurable per-question timer behavior.
+- Persist theme, timer, stats, difficulty, and category preferences.
+- Add quick-start and reduced-motion options.
+
 ## Project Structure
 
 ```text

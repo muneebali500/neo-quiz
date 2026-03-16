@@ -29,6 +29,27 @@
           </div>
         </div>
 
+        <nav class="header-controls" aria-label="App controls">
+          <button
+            class="theme-toggle"
+            id="theme-toggle"
+            title="Toggle Theme"
+            aria-label="Toggle colour theme"
+          >
+            <i class="fas fa-palette" aria-hidden="true"></i>
+          </button>
+          <button
+            class="settings-btn"
+            id="settings-btn"
+            title="Settings"
+            aria-label="Open settings"
+            aria-expanded="false"
+            aria-controls="settings-panel"
+          >
+            <i class="fas fa-cog" aria-hidden="true"></i>
+          </button>
+        </nav>
+
         <dl class="stats" role="status" aria-label="Quiz configuration">
           <div class="stat-item">
             <dd class="stat-value" id="total-questions">10</dd>
@@ -43,6 +64,91 @@
             <dt class="stat-label">Difficulty</dt>
           </div>
         </dl>
+
+        <aside
+          class="settings-panel"
+          id="settings-panel"
+          aria-label="Settings"
+          hidden
+        >
+          <h2 class="settings-title">
+            <i class="fas fa-sliders-h" aria-hidden="true"></i> Settings
+          </h2>
+
+          <section class="settings-group" aria-labelledby="appearance-label">
+            <h3 class="settings-group-title" id="appearance-label">
+              Appearance
+            </h3>
+            <ul
+              class="theme-options"
+              role="radiogroup"
+              aria-labelledby="appearance-label"
+            >
+              <li class="theme-option active" role="radio" data-theme="default">
+                Default
+              </li>
+              <li class="theme-option" role="radio" data-theme="dark">Dark</li>
+              <li
+                class="theme-option"
+                role="radio"
+                data-theme="high-contrast"
+              >
+                High Contrast
+              </li>
+              <li class="theme-option" role="radio" data-theme="minimal">
+                Minimal
+              </li>
+            </ul>
+          </section>
+
+          <section class="settings-group" aria-labelledby="timer-label">
+            <h3 class="settings-group-title" id="timer-label">Timer Options</h3>
+            <ul
+              class="timer-options"
+              role="radiogroup"
+              aria-labelledby="timer-label"
+            >
+              <li class="timer-option active" role="radio" data-time="15">15s</li>
+              <li class="timer-option" role="radio" data-time="20">20s</li>
+              <li class="timer-option" role="radio" data-time="30">30s</li>
+              <li class="timer-option" role="radio" data-time="45">45s</li>
+              <li class="timer-option" role="radio" data-time="0">
+                No Timer
+              </li>
+            </ul>
+          </section>
+
+          <section class="settings-group" aria-labelledby="prefs-label">
+            <h3 class="settings-group-title" id="prefs-label">Preferences</h3>
+            <div class="setting-row">
+              <label class="setting-label" for="show-stats">
+                Show Question Stats
+              </label>
+              <label class="switch">
+                <input type="checkbox" id="show-stats" checked />
+                <span class="slider"></span>
+              </label>
+            </div>
+            <div class="setting-row">
+              <label class="setting-label" for="reduce-motion">
+                Reduce Animations
+              </label>
+              <label class="switch">
+                <input type="checkbox" id="reduce-motion" />
+                <span class="slider"></span>
+              </label>
+            </div>
+          </section>
+
+          <section class="settings-group" aria-labelledby="quickstart-label">
+            <h3 class="settings-group-title" id="quickstart-label">
+              Quick Start
+            </h3>
+            <button class="btn btn-primary quick-start-btn" id="quick-start-btn">
+              <i class="fas fa-bolt" aria-hidden="true"></i> Start Quick Quiz
+            </button>
+          </section>
+        </aside>
       </header>
 
       <main class="main-content">
@@ -229,6 +335,21 @@
                   id="question-category-badge"
                 ></span>
               </div>
+              <div class="timer-container">
+                <time
+                  class="timer"
+                  id="timer"
+                  aria-live="polite"
+                  aria-label="Time remaining"
+                >
+                  <i class="fas fa-clock" aria-hidden="true"></i>
+                  <span id="time-left">15</span>s
+                </time>
+                <p class="question-stats" id="question-stats">
+                  <i class="fas fa-chart-bar" aria-hidden="true"></i>
+                  <span id="stats-text">Fresh API question</span>
+                </p>
+              </div>
             </header>
 
             <h2 class="question-text" id="question-text"></h2>
@@ -291,6 +412,7 @@
               id="performance-message"
               aria-live="polite"
             ></p>
+            <p class="time-used" id="time-used"></p>
           </section>
 
           <nav class="results-actions" aria-label="Post-quiz actions">

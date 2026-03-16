@@ -27,6 +27,13 @@ const state = {
   currentQuestionIndex: 0,
   score: 0,
   userAnswers: [],
+  timer: null,
+  timeLeft: 15,
+  startTime: null,
+  totalTimeUsed: 0,
+  currentTheme: "default",
+  showStats: true,
+  reducedMotion: false,
 };
 
 const categoryGrid = document.querySelector("#category-grid");
@@ -46,6 +53,18 @@ const tryAgainButton = document.querySelector("#try-again-btn");
 const shareResultsButton = document.querySelector("#share-results-btn");
 const fallbackButton = document.querySelector("#fallback-btn");
 const backToSetupButton = document.querySelector("#back-to-setup-btn");
+const settingsButton = document.querySelector("#settings-btn");
+const settingsPanel = document.querySelector("#settings-panel");
+const themeToggle = document.querySelector("#theme-toggle");
+const themeOptions = document.querySelectorAll(".theme-option");
+const timerOptions = document.querySelectorAll(".timer-option");
+const showStatsToggle = document.querySelector("#show-stats");
+const reduceMotionToggle = document.querySelector("#reduce-motion");
+const quickStartButton = document.querySelector("#quick-start-btn");
+const timerDisplay = document.querySelector("#timer");
+const timeLeftText = document.querySelector("#time-left");
+const questionStats = document.querySelector("#question-stats");
+const statsText = document.querySelector("#stats-text");
 
 const localQuestions = [
   {
@@ -142,6 +161,14 @@ const localQuestions = [
   },
 ];
 
+function init() {
+  loadSettings();
+  renderCategories();
+  bindDifficultyCards();
+  updateSummary();
+  updateSettingsUI();
+}
+
 function renderCategories() {
   categoryGrid.innerHTML = "";
 
@@ -198,6 +225,7 @@ function selectDifficulty(level) {
   });
 
   updateSummary();
+  saveSettings();
   showNotice(`Difficulty set to ${capitalize(level)}`);
 }
 
@@ -206,6 +234,7 @@ function selectCategory(id, label) {
   state.selectedCategoryLabel = label;
   renderCategories();
   updateSummary();
+  saveSettings();
   showNotice(`Category set to ${label}`);
 }
 
@@ -225,6 +254,8 @@ function updateSummary() {
 }
 
 function showNotice(message) {
+  if (state.reducedMotion) return;
+
   notice.textContent = message;
   notice.style.display = "block";
 
@@ -240,6 +271,7 @@ function showInstructions() {
 }
 
 async function startQuiz() {
+  saveSettings();
   showScreen(loadingScreen);
 
   try {
@@ -252,9 +284,11 @@ async function startQuiz() {
   state.currentQuestionIndex = 0;
   state.score = 0;
   state.userAnswers = [];
+  state.startTime = Date.now();
 
   showScreen(quizScreen);
   renderQuestion();
+  startTimer();
 }
 
 async function fetchQuestions() {
@@ -303,9 +337,11 @@ function startFallbackQuiz() {
   state.currentQuestionIndex = 0;
   state.score = 0;
   state.userAnswers = [];
+  state.startTime = Date.now();
 
   showScreen(quizScreen);
   renderQuestion();
+  startTimer();
 }
 
 function renderQuestion() {
@@ -320,11 +356,16 @@ function renderQuestion() {
   document.querySelector("#question-category-badge").textContent =
     question.category;
   document.querySelector("#question-text").textContent = question.question;
+  statsText.textContent =
+    question.difficulty ? `${capitalize(question.difficulty)} question` : "Quiz question";
+  questionStats.classList.toggle("show", state.showStats);
 
   optionsContainer.innerHTML = "";
   document.querySelector("#explanation-container").style.display = "none";
   nextButton.disabled = true;
   nextButton.setAttribute("aria-disabled", "true");
+  state.timeLeft = state.timerDuration;
+  updateTimerDisplay();
 
   const answers = shuffleArray([
     ...question.incorrectAnswers,
@@ -349,6 +390,7 @@ function renderQuestion() {
 function selectAnswer(selectedOption, selectedAnswer, correctAnswer) {
   if (state.userAnswers[state.currentQuestionIndex] !== undefined) return;
 
+  clearTimer();
   state.userAnswers[state.currentQuestionIndex] = selectedAnswer;
 
   document.querySelectorAll(".option").forEach((option) => {
@@ -379,6 +421,7 @@ function nextQuestion() {
 
   if (state.currentQuestionIndex < state.questions.length) {
     renderQuestion();
+    startTimer();
     return;
   }
 
@@ -386,13 +429,19 @@ function nextQuestion() {
 }
 
 function restartQuiz() {
+  clearTimer();
   showScreen(welcomeScreen);
   state.currentQuestionIndex = 0;
   state.score = 0;
   state.userAnswers = [];
+  state.totalTimeUsed = 0;
 }
 
 function showResults() {
+  clearTimer();
+  state.totalTimeUsed = state.startTime
+    ? Math.floor((Date.now() - state.startTime) / 1000)
+    : 0;
   showScreen(resultsScreen);
 
   const percentage = Math.round((state.score / state.questions.length) * 100);
@@ -400,6 +449,8 @@ function showResults() {
     `${state.score}/${state.questions.length}`;
   document.querySelector("#performance-message").textContent =
     getPerformanceMessage(percentage);
+  document.querySelector("#time-used").textContent =
+    state.totalTimeUsed > 0 ? `Completed in ${state.totalTimeUsed} seconds` : "";
 
   renderAnswerReview();
 }
@@ -415,6 +466,67 @@ function showScreen(activeScreen) {
       screen.style.display = screen === activeScreen ? "block" : "none";
     },
   );
+}
+
+function startTimer() {
+  clearTimer();
+
+  if (state.timerDuration === 0) {
+    updateTimerDisplay();
+    return;
+  }
+
+  state.timer = setInterval(() => {
+    state.timeLeft--;
+    updateTimerDisplay();
+
+    if (state.timeLeft <= 0) {
+      handleTimeExpired();
+    }
+  }, 1000);
+}
+
+function clearTimer() {
+  if (state.timer) {
+    clearInterval(state.timer);
+    state.timer = null;
+  }
+}
+
+function updateTimerDisplay() {
+  timeLeftText.textContent = state.timeLeft;
+  timerDisplay.style.display = state.timerDuration === 0 ? "none" : "inline-flex";
+  timerDisplay.classList.toggle(
+    "warning",
+    state.timerDuration > 0 && state.timeLeft <= 5 && state.timeLeft > 2,
+  );
+  timerDisplay.classList.toggle(
+    "danger",
+    state.timerDuration > 0 && state.timeLeft <= 2,
+  );
+}
+
+function handleTimeExpired() {
+  clearTimer();
+
+  if (state.userAnswers[state.currentQuestionIndex] !== undefined) return;
+
+  const question = state.questions[state.currentQuestionIndex];
+  state.userAnswers[state.currentQuestionIndex] = null;
+
+  document.querySelectorAll(".option").forEach((option) => {
+    option.classList.add("disabled");
+
+    if (option.querySelector(".option-text").textContent === question.correctAnswer) {
+      option.classList.add("correct");
+    }
+  });
+
+  document.querySelector("#explanation-text").textContent =
+    `Time is up. The correct answer is "${question.correctAnswer}".`;
+  document.querySelector("#explanation-container").style.display = "block";
+  nextButton.disabled = false;
+  nextButton.setAttribute("aria-disabled", "false");
 }
 
 function renderAnswerReview() {
@@ -480,6 +592,137 @@ function shareResults() {
   });
 }
 
+function loadSettings() {
+  const savedTheme = localStorage.getItem("neoQuizTheme");
+  const savedTimer = localStorage.getItem("neoQuizTimer");
+  const savedStats = localStorage.getItem("neoQuizShowStats");
+  const savedMotion = localStorage.getItem("neoQuizReducedMotion");
+  const savedDifficulty = localStorage.getItem("neoQuizDifficulty");
+  const savedCategoryId = localStorage.getItem("neoQuizCategoryId");
+  const savedCategoryLabel = localStorage.getItem("neoQuizCategoryLabel");
+
+  if (savedTheme) state.currentTheme = savedTheme;
+  if (savedTimer !== null) state.timerDuration = Number(savedTimer);
+  if (savedStats !== null) state.showStats = savedStats === "true";
+  if (savedMotion !== null) state.reducedMotion = savedMotion === "true";
+  if (savedDifficulty) state.selectedDifficulty = savedDifficulty;
+  if (savedCategoryId) state.selectedCategoryId = Number(savedCategoryId);
+  if (savedCategoryLabel) state.selectedCategoryLabel = savedCategoryLabel;
+}
+
+function saveSettings() {
+  localStorage.setItem("neoQuizTheme", state.currentTheme);
+  localStorage.setItem("neoQuizTimer", state.timerDuration);
+  localStorage.setItem("neoQuizShowStats", state.showStats);
+  localStorage.setItem("neoQuizReducedMotion", state.reducedMotion);
+  localStorage.setItem("neoQuizDifficulty", state.selectedDifficulty);
+  localStorage.setItem("neoQuizCategoryId", state.selectedCategoryId);
+  localStorage.setItem("neoQuizCategoryLabel", state.selectedCategoryLabel);
+}
+
+function updateSettingsUI() {
+  applyTheme(state.currentTheme);
+
+  showStatsToggle.checked = state.showStats;
+  reduceMotionToggle.checked = state.reducedMotion;
+  document.body.classList.toggle("reduced-motion", state.reducedMotion);
+
+  timerOptions.forEach((option) => {
+    const isSelected = Number(option.dataset.time) === state.timerDuration;
+    option.classList.toggle("active", isSelected);
+    option.setAttribute("aria-checked", isSelected ? "true" : "false");
+  });
+
+  difficultyCards.forEach((card) => {
+    const isSelected = card.dataset.difficulty === state.selectedDifficulty;
+    card.classList.toggle("active", isSelected);
+    card.setAttribute("aria-checked", isSelected ? "true" : "false");
+  });
+}
+
+function toggleSettings() {
+  const isOpen = settingsPanel.classList.toggle("show");
+  settingsPanel.hidden = !isOpen;
+  settingsButton.setAttribute("aria-expanded", isOpen ? "true" : "false");
+}
+
+function toggleTheme() {
+  const themes = ["default", "dark", "high-contrast", "minimal"];
+  const currentIndex = themes.indexOf(state.currentTheme);
+  const nextTheme = themes[(currentIndex + 1) % themes.length];
+  changeTheme(nextTheme);
+}
+
+function changeTheme(theme) {
+  state.currentTheme = theme;
+  applyTheme(theme);
+  saveSettings();
+  showNotice(`Theme set to ${theme.replace("-", " ")}`);
+}
+
+function applyTheme(theme) {
+  document.body.classList.remove(
+    "theme-dark",
+    "theme-high-contrast",
+    "theme-minimal",
+  );
+
+  if (theme !== "default") {
+    document.body.classList.add(`theme-${theme}`);
+  }
+
+  themeOptions.forEach((option) => {
+    const isSelected = option.dataset.theme === theme;
+    option.classList.toggle("active", isSelected);
+    option.setAttribute("aria-checked", isSelected ? "true" : "false");
+  });
+}
+
+function changeTimer(duration) {
+  state.timerDuration = duration;
+  state.timeLeft = duration;
+  updateSummary();
+  updateSettingsUI();
+  updateTimerDisplay();
+  saveSettings();
+  showNotice(duration === 0 ? "Timer turned off" : `Timer set to ${duration}s`);
+}
+
+function toggleQuestionStats() {
+  state.showStats = !state.showStats;
+  questionStats.classList.toggle("show", state.showStats);
+  saveSettings();
+}
+
+function toggleReducedMotion() {
+  state.reducedMotion = !state.reducedMotion;
+  document.body.classList.toggle("reduced-motion", state.reducedMotion);
+  saveSettings();
+}
+
+function quickStart() {
+  state.selectedDifficulty = "easy";
+  state.timerDuration = 15;
+  updateSettingsUI();
+  updateSummary();
+  saveSettings();
+  settingsPanel.classList.remove("show");
+  settingsPanel.hidden = true;
+  settingsButton.setAttribute("aria-expanded", "false");
+  startQuiz();
+}
+
+document.addEventListener("click", (event) => {
+  if (
+    !event.target.closest("#settings-panel") &&
+    !event.target.closest("#settings-btn")
+  ) {
+    settingsPanel.classList.remove("show");
+    settingsPanel.hidden = true;
+    settingsButton.setAttribute("aria-expanded", "false");
+  }
+});
+
 function shuffleArray(items) {
   const shuffled = [...items];
 
@@ -504,10 +747,6 @@ function decodeHTML(value) {
   return textarea.value;
 }
 
-renderCategories();
-bindDifficultyCards();
-updateSummary();
-
 startButton.addEventListener("click", startQuiz);
 instructionsButton.addEventListener("click", showInstructions);
 nextButton.addEventListener("click", nextQuestion);
@@ -516,3 +755,16 @@ tryAgainButton.addEventListener("click", restartQuiz);
 shareResultsButton.addEventListener("click", shareResults);
 fallbackButton.addEventListener("click", startFallbackQuiz);
 backToSetupButton.addEventListener("click", restartQuiz);
+settingsButton.addEventListener("click", toggleSettings);
+themeToggle.addEventListener("click", toggleTheme);
+showStatsToggle.addEventListener("change", toggleQuestionStats);
+reduceMotionToggle.addEventListener("change", toggleReducedMotion);
+quickStartButton.addEventListener("click", quickStart);
+themeOptions.forEach((option) => {
+  option.addEventListener("click", () => changeTheme(option.dataset.theme));
+});
+timerOptions.forEach((option) => {
+  option.addEventListener("click", () => changeTimer(Number(option.dataset.time)));
+});
+
+init();
