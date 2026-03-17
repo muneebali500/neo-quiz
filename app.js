@@ -34,6 +34,7 @@ const state = {
   currentTheme: "default",
   showStats: true,
   reducedMotion: false,
+  keyboardShortcutsEnabled: true,
 };
 
 const categoryGrid = document.querySelector("#category-grid");
@@ -54,17 +55,23 @@ const shareResultsButton = document.querySelector("#share-results-btn");
 const fallbackButton = document.querySelector("#fallback-btn");
 const backToSetupButton = document.querySelector("#back-to-setup-btn");
 const settingsButton = document.querySelector("#settings-btn");
+const infoButton = document.querySelector("#info-btn");
 const settingsPanel = document.querySelector("#settings-panel");
 const themeToggle = document.querySelector("#theme-toggle");
 const themeOptions = document.querySelectorAll(".theme-option");
 const timerOptions = document.querySelectorAll(".timer-option");
 const showStatsToggle = document.querySelector("#show-stats");
+const keyboardShortcutsToggle = document.querySelector("#keyboard-shortcuts");
 const reduceMotionToggle = document.querySelector("#reduce-motion");
 const quickStartButton = document.querySelector("#quick-start-btn");
 const timerDisplay = document.querySelector("#timer");
 const timeLeftText = document.querySelector("#time-left");
 const questionStats = document.querySelector("#question-stats");
 const statsText = document.querySelector("#stats-text");
+const shortcutHint = document.querySelector("#shortcut-hint");
+const quizShortcutHint = document.querySelector("#quiz-shortcut-hint");
+const popupOverlay = document.querySelector("#popup-overlay");
+const closePopupButton = document.querySelector("#close-popup-btn");
 
 const localQuestions = [
   {
@@ -162,11 +169,13 @@ const localQuestions = [
 ];
 
 function init() {
+  showPopup();
   loadSettings();
   renderCategories();
   bindDifficultyCards();
   updateSummary();
   updateSettingsUI();
+  setupKeyboardShortcuts();
 }
 
 function renderCategories() {
@@ -273,6 +282,7 @@ function showInstructions() {
 async function startQuiz() {
   saveSettings();
   showScreen(loadingScreen);
+  quizShortcutHint.classList.toggle("show", state.keyboardShortcutsEnabled);
 
   try {
     state.questions = await fetchQuestions();
@@ -287,6 +297,7 @@ async function startQuiz() {
   state.startTime = Date.now();
 
   showScreen(quizScreen);
+  quizShortcutHint.classList.toggle("show", state.keyboardShortcutsEnabled);
   renderQuestion();
   startTimer();
 }
@@ -340,6 +351,7 @@ function startFallbackQuiz() {
   state.startTime = Date.now();
 
   showScreen(quizScreen);
+  quizShortcutHint.classList.toggle("show", state.keyboardShortcutsEnabled);
   renderQuestion();
   startTimer();
 }
@@ -597,6 +609,7 @@ function loadSettings() {
   const savedTimer = localStorage.getItem("neoQuizTimer");
   const savedStats = localStorage.getItem("neoQuizShowStats");
   const savedMotion = localStorage.getItem("neoQuizReducedMotion");
+  const savedShortcuts = localStorage.getItem("neoQuizKeyboardShortcuts");
   const savedDifficulty = localStorage.getItem("neoQuizDifficulty");
   const savedCategoryId = localStorage.getItem("neoQuizCategoryId");
   const savedCategoryLabel = localStorage.getItem("neoQuizCategoryLabel");
@@ -605,6 +618,9 @@ function loadSettings() {
   if (savedTimer !== null) state.timerDuration = Number(savedTimer);
   if (savedStats !== null) state.showStats = savedStats === "true";
   if (savedMotion !== null) state.reducedMotion = savedMotion === "true";
+  if (savedShortcuts !== null) {
+    state.keyboardShortcutsEnabled = savedShortcuts === "true";
+  }
   if (savedDifficulty) state.selectedDifficulty = savedDifficulty;
   if (savedCategoryId) state.selectedCategoryId = Number(savedCategoryId);
   if (savedCategoryLabel) state.selectedCategoryLabel = savedCategoryLabel;
@@ -615,6 +631,10 @@ function saveSettings() {
   localStorage.setItem("neoQuizTimer", state.timerDuration);
   localStorage.setItem("neoQuizShowStats", state.showStats);
   localStorage.setItem("neoQuizReducedMotion", state.reducedMotion);
+  localStorage.setItem(
+    "neoQuizKeyboardShortcuts",
+    state.keyboardShortcutsEnabled,
+  );
   localStorage.setItem("neoQuizDifficulty", state.selectedDifficulty);
   localStorage.setItem("neoQuizCategoryId", state.selectedCategoryId);
   localStorage.setItem("neoQuizCategoryLabel", state.selectedCategoryLabel);
@@ -624,8 +644,14 @@ function updateSettingsUI() {
   applyTheme(state.currentTheme);
 
   showStatsToggle.checked = state.showStats;
+  keyboardShortcutsToggle.checked = state.keyboardShortcutsEnabled;
   reduceMotionToggle.checked = state.reducedMotion;
   document.body.classList.toggle("reduced-motion", state.reducedMotion);
+  shortcutHint.classList.toggle("show", state.keyboardShortcutsEnabled);
+  quizShortcutHint.classList.toggle(
+    "show",
+    state.keyboardShortcutsEnabled && isScreenVisible(quizScreen),
+  );
 
   timerOptions.forEach((option) => {
     const isSelected = Number(option.dataset.time) === state.timerDuration;
@@ -694,6 +720,18 @@ function toggleQuestionStats() {
   saveSettings();
 }
 
+function toggleKeyboardShortcuts() {
+  state.keyboardShortcutsEnabled = !state.keyboardShortcutsEnabled;
+  updateSettingsUI();
+  setupKeyboardShortcuts();
+  saveSettings();
+  showNotice(
+    state.keyboardShortcutsEnabled
+      ? "Keyboard shortcuts enabled"
+      : "Keyboard shortcuts disabled",
+  );
+}
+
 function toggleReducedMotion() {
   state.reducedMotion = !state.reducedMotion;
   document.body.classList.toggle("reduced-motion", state.reducedMotion);
@@ -712,14 +750,98 @@ function quickStart() {
   startQuiz();
 }
 
+function setupKeyboardShortcuts() {
+  document.removeEventListener("keydown", handleKeyboardShortcuts);
+
+  if (state.keyboardShortcutsEnabled) {
+    document.addEventListener("keydown", handleKeyboardShortcuts);
+  }
+}
+
+function handleKeyboardShortcuts(event) {
+  if (event.target.matches("input, textarea")) return;
+
+  if (event.key === "Escape") {
+    closeSettings();
+    closePopup();
+    return;
+  }
+
+  if (event.ctrlKey && event.key.toLowerCase() === "t") {
+    event.preventDefault();
+    toggleTheme();
+    return;
+  }
+
+  if (isPopupOpen()) return;
+
+  if (event.key === " " && isScreenVisible(welcomeScreen)) {
+    event.preventDefault();
+    startQuiz();
+    return;
+  }
+
+  if (
+    ["1", "2", "3", "4"].includes(event.key) &&
+    isScreenVisible(quizScreen)
+  ) {
+    const option = document.querySelectorAll(".option")[Number(event.key) - 1];
+
+    if (option) {
+      option.click();
+    }
+    return;
+  }
+
+  if (
+    (event.key === " " || event.key.toLowerCase() === "n") &&
+    isScreenVisible(quizScreen) &&
+    !nextButton.disabled
+  ) {
+    event.preventDefault();
+    nextQuestion();
+    return;
+  }
+
+  if (event.key.toLowerCase() === "r" && isScreenVisible(quizScreen)) {
+    restartQuiz();
+  }
+}
+
+function showPopup() {
+  popupOverlay.classList.add("active");
+  popupOverlay.setAttribute("aria-hidden", "false");
+}
+
+function closePopup() {
+  popupOverlay.classList.remove("active");
+  popupOverlay.setAttribute("aria-hidden", "true");
+}
+
+function closeSettings() {
+  settingsPanel.classList.remove("show");
+  settingsPanel.hidden = true;
+  settingsButton.setAttribute("aria-expanded", "false");
+}
+
+function isScreenVisible(screen) {
+  return getComputedStyle(screen).display !== "none";
+}
+
+function isPopupOpen() {
+  return popupOverlay.classList.contains("active");
+}
+
 document.addEventListener("click", (event) => {
   if (
     !event.target.closest("#settings-panel") &&
     !event.target.closest("#settings-btn")
   ) {
-    settingsPanel.classList.remove("show");
-    settingsPanel.hidden = true;
-    settingsButton.setAttribute("aria-expanded", "false");
+    closeSettings();
+  }
+
+  if (event.target === popupOverlay) {
+    closePopup();
   }
 });
 
@@ -756,10 +878,13 @@ shareResultsButton.addEventListener("click", shareResults);
 fallbackButton.addEventListener("click", startFallbackQuiz);
 backToSetupButton.addEventListener("click", restartQuiz);
 settingsButton.addEventListener("click", toggleSettings);
+infoButton.addEventListener("click", showPopup);
 themeToggle.addEventListener("click", toggleTheme);
 showStatsToggle.addEventListener("change", toggleQuestionStats);
+keyboardShortcutsToggle.addEventListener("change", toggleKeyboardShortcuts);
 reduceMotionToggle.addEventListener("change", toggleReducedMotion);
 quickStartButton.addEventListener("click", quickStart);
+closePopupButton.addEventListener("click", closePopup);
 themeOptions.forEach((option) => {
   option.addEventListener("click", () => changeTheme(option.dataset.theme));
 });
