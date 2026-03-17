@@ -109,11 +109,7 @@ li {
   align-items: center;
   justify-content: space-between;
   gap: 24px;
-  background: linear-gradient(
-    135deg,
-    var(--primary) 0%,
-    var(--secondary) 100%
-  );
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
   color: white;
 }
 
@@ -380,11 +376,7 @@ li {
 
 .welcome-title {
   margin-bottom: 14px;
-  background: linear-gradient(
-    135deg,
-    var(--primary) 0%,
-    var(--accent) 100%
-  );
+  background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
   background-clip: text;
   color: transparent;
   font-family: "Syne", sans-serif;
@@ -1183,12 +1175,10 @@ kbd {
   align-items: center;
   justify-content: center;
   gap: 15px;
-  color: var(--primary);
   font-size: 2.2rem;
 }
 
 .popup-subtitle {
-  color: var(--accent);
   font-size: 1.2rem;
   font-weight: 300;
   opacity: 0.9;
