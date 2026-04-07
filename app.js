@@ -811,11 +811,15 @@ function handleKeyboardShortcuts(event) {
 function showPopup() {
   popupOverlay.classList.add("active");
   popupOverlay.setAttribute("aria-hidden", "false");
+  document.documentElement.style.overflow = "hidden";
+  document.body.style.overflow = "hidden";
 }
 
 function closePopup() {
   popupOverlay.classList.remove("active");
   popupOverlay.setAttribute("aria-hidden", "true");
+  document.documentElement.style.overflow = "";
+  document.body.style.overflow = "";
 }
 
 function closeSettings() {
